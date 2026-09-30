@@ -1,15 +1,14 @@
-import mysql.connector
+from livros import Livros
+from PySide6.QtWidgets import QApplication, QWidget
+from PySide6.QtUiTools import QUiLoader
+from PySide6.QtCore import QFile
+import sys
+from tela_pesquisar_livro import TelaPesquisarLivro
 
-conector = mysql.connector.connect(
-    host = "localhost",
-    user = "root",
-    password = "",
-    database = "biblioteca_py",
-    
-)
+app = QApplication([])
 
-cursor = conector.cursor()
+tela_main = TelaPesquisarLivro()
+app.exec()
 
-cursor.execute("INSERT INTO livro(isbn, autor, titulo, data_lancamento, genero_literario, editora) VALUES (123435, 'machado de assis', 'dom casmurro'. '1899-02-25', 'romance', 'livaria')")
 
-conector.commit()
+

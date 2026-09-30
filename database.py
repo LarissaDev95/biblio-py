@@ -26,11 +26,10 @@ class Database:
         )
     
     def __create_cursor__(self):
-        return self._conn.cursor()
+        return self._conn.cursor(dictionary=True)
 
     def exec(self):
         self.query +=";"
-        print(self.query)
         self._cursor.execute(self.query)
         return self._cursor
 
@@ -47,29 +46,48 @@ class Database:
 
         return campos
 
-    def where(self, rules:dict= {}):
+    def where(self, rules: dict = None):
+        if not rules:
+            return self
+
         self.query += "WHERE "
 
+        conditions = []
+
         for key, value in rules.items():
-            self.query+= f"{key} LIKE '%{value}%'"
+            conditions.append(f"{key} = {f"'{value}'" if isinstance(value, str) else f"{value}"}")
+
+        self.query += " AND ".join(conditions)
 
         return self
 
-def insert(self, fields : dict = {}):
-    values = ''
-    formated_values = []
+    def insert(self, fields:dict=None):
+        if fields is None or len(fields.items()) <= 0:
+            return self
+        values = []
 
-    for value in fields.values():
-        value
-        if isinstance(value, str):
-            value = f"'{value}'"
-
-        formated_values.append(str(value))
-
-        values = ",".join(formated_values)
+        for value in fields.values():
+            if isinstance(value, str):
+                value = f"'{value}'"
             
-        values += f'{value},' if not (value == list(fields.values())[-1]) else f'{value}'
+            values.append(str(value))
 
-    self.query = f"INSERT INTO {self.table}({','.join(fields)}) VALUES({values})"
-    return self
+        self.query = f"INSERT INTO {self.table}({', '.join(fields)}) VALUES({",".join(values)})"
+        return self
+    
+    def update(self,*, fields:dict=None, id):
+        values = []
 
+        for value in fields.values():
+            if isinstance(value, str):
+                value = f"'{value}'"
+            
+            values.append(str(value))
+
+        self.query = f"UPDATE {self.table}({', '.join(fields)}) VALUES({",".join(values)})"
+        return self.where({'id': id})
+    
+    def delete(self, id):
+        self.query = f"DELETE FROM {self.table} "
+
+        return self.where({'id': id})
